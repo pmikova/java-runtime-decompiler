@@ -10,8 +10,10 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
+import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.DecompilerWrapper;
+import org.jrd.frontend.frame.main.renderer.ClassListRenderer;
 import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;
@@ -49,11 +51,13 @@ public class BytecodeDecompilerView {
             private JPanel classes;
                 private JPanel classesToolBar;
                     private JButton reloadClassesButton;
+                    private JCheckBox showInfoCheckBox;
                     private JTextField classesSortField;
                         private final Color classesSortFieldColor;
                 private JPanel classesPanel;
                     private JScrollPane classesScrollPane;
-                        private JList<String> filteredClassesJList;
+                        private JList<ClassInfo> filteredClassesJList;
+                            private ClassListRenderer filteredClassesRenderer;
             private JPanel buffersPanel;
                 private JPanel buffersToolBar;
                     private JButton undoButton;
@@ -74,7 +78,7 @@ public class BytecodeDecompilerView {
     private ActionListener classesActionListener;
     private OverwriteActionListener overwriteActionListener;
 
-    private String[] loadedClasses;
+    private ClassInfo[] loadedClasses;
     private String lastDecompiledClass = "";
 
     private SearchContext searchContext;
@@ -140,12 +144,14 @@ public class BytecodeDecompilerView {
 
         classesPanel.add(classesSortField, BorderLayout.NORTH);
 
+        filteredClassesRenderer = new ClassListRenderer();
+
         filteredClassesJList = new JList<>();
-        filteredClassesJList.setFixedCellHeight(20);
+        filteredClassesJList.setCellRenderer(filteredClassesRenderer);
         filteredClassesJList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                final String name = filteredClassesJList.getSelectedValue();
+                final String name = filteredClassesJList.getSelectedValue().getName();
                 if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
                     classWorker(name);
                 }
@@ -156,7 +162,7 @@ public class BytecodeDecompilerView {
             @Override
             public void keyReleased(KeyEvent e) {
                 if (CLASS_LIST_REGISTERED_KEY_CODES.contains(e.getKeyCode())) {
-                    final String name = filteredClassesJList.getSelectedValue();
+                    final String name = filteredClassesJList.getSelectedValue().getName();
                     if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
                         classWorker(name);
                     }
@@ -172,7 +178,7 @@ public class BytecodeDecompilerView {
         overwriteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final String name = filteredClassesJList.getSelectedValue();
+                final String name = filteredClassesJList.getSelectedValue().getName();
                 new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() throws Exception {
@@ -232,6 +238,9 @@ public class BytecodeDecompilerView {
         });
         redoButton.setPreferredSize(buttonSizeBasedOnTextField(redoButton, classesSortField));
 
+        showInfoCheckBox = new JCheckBox("Show detailed class info");
+        showInfoCheckBox.addActionListener(event -> handleClassInfoSwitching());
+
         classesToolBar = new JPanel(new GridBagLayout());
         classesToolBar.setBorder(new EtchedBorder());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -244,6 +253,16 @@ public class BytecodeDecompilerView {
 
         gbc.gridx = 1;
         gbc.weightx = 1;
+        classesToolBar.add(Box.createHorizontalGlue(), gbc);
+
+        gbc.gridx = 2;
+        gbc.weightx = 0;
+        classesToolBar.add(showInfoCheckBox, gbc);
+
+        gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.weightx = 1;
+        gbc.gridwidth = 3;
         classesToolBar.add(classesSortField, gbc);
 
         pluginComboBox = new JComboBox<DecompilerWrapper>();
@@ -251,7 +270,7 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (filteredClassesJList.getSelectedIndex() != -1) {
-                    ActionEvent event = new ActionEvent(this, 1, filteredClassesJList.getSelectedValue());
+                    ActionEvent event = new ActionEvent(this, 1, filteredClassesJList.getSelectedValue().getName());
                     bytesActionListener.actionPerformed(event);
                 }
             }
@@ -344,6 +363,21 @@ public class BytecodeDecompilerView {
 
         bytecodeDecompilerPanel.setVisible(true);
 
+    }
+
+    private void handleClassInfoSwitching() {
+        filteredClassesRenderer.setDoShowInfo(showInfoCheckBox.isSelected());
+
+        // invalidate JList cache
+        filteredClassesJList.setFixedCellWidth(1);
+        filteredClassesJList.setFixedCellWidth(-1);
+
+        filteredClassesJList.ensureIndexIsVisible(filteredClassesJList.getSelectedIndex());
+
+        filteredClassesJList.revalidate();
+        filteredClassesJList.repaint();
+
+        updateClassList(); // reinterpret current search
     }
 
     private static class UndoRedoKeyAdapter extends KeyAdapter {
@@ -533,17 +567,19 @@ public class BytecodeDecompilerView {
     }
 
     private void updateClassList() {
-        List<String> filtered = new ArrayList<>();
+        List<ClassInfo> filtered = new ArrayList<>();
         String filter = classesSortField.getText().trim();
         if (filter.isEmpty()) {
             filter = ".*";
         }
+
         try {
             Pattern p = Pattern.compile(filter);
             classesSortField.setForeground(classesSortFieldColor);
             classesSortField.repaint();
-            for (String clazz : loadedClasses) {
-                Matcher m = p.matcher(clazz);
+
+            for (ClassInfo clazz : loadedClasses) {
+                Matcher m = p.matcher(clazz.getSearchableString(showInfoCheckBox.isSelected()));
                 if (m.matches()) {
                     filtered.add(clazz);
                 }
@@ -551,14 +587,16 @@ public class BytecodeDecompilerView {
         } catch (Exception ex) {
             classesSortField.setForeground(Color.red);
             classesSortField.repaint();
-            for (String clazz : loadedClasses) {
-                if (!clazz.contains(filter)) {
+
+            // regex is invalid => just use .contains()
+            for (ClassInfo clazz : loadedClasses) {
+                if (!clazz.getSearchableString(showInfoCheckBox.isSelected()).contains(filter)) {
                     filtered.add(clazz);
                 }
             }
         }
-        filteredClassesJList.setListData(filtered.toArray(new String[filtered.size()]));
 
+        filteredClassesJList.setListData(filtered.toArray(new ClassInfo[0]));
     }
 
     /**
@@ -566,7 +604,7 @@ public class BytecodeDecompilerView {
      *
      * @param classesToReload String[] classesToReload.
      */
-    public void reloadClassList(String[] classesToReload) {
+    public void reloadClassList(ClassInfo[] classesToReload) {
         loadedClasses = Arrays.copyOf(classesToReload, classesToReload.length);
         SwingUtilities.invokeLater(() -> updateClassList());
     }

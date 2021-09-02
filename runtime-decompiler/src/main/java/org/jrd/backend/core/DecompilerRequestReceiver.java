@@ -178,7 +178,9 @@ public class DecompilerRequestReceiver {
         return OK_RESPONSE;
     }
 
-    private String getAllLoadedClassesAction(String hostname, int listenPort, String vmId, int vmPid, String requestBody) {
+    private String getAllLoadedClassesAction(
+            String hostname, int listenPort, String vmId, int vmPid, String requestBody
+    ) {
         try {
             ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, requestBody);
 
@@ -225,8 +227,9 @@ public class DecompilerRequestReceiver {
     }
 
     private ClassInfo[] parseClasses(String classes) {
+        // filter: not null && backwards compatibility && name is not empty
         return Arrays.stream(classes.split(";"))
-                .filter(s -> s != null && !s.isEmpty() && !s.startsWith("|")) // ... && backwards compatibility && name is not empty
+                .filter(s -> s != null && !s.isEmpty() && !s.startsWith("|"))
                 .map(ClassInfo::new)
                 .toArray(ClassInfo[]::new);
     }

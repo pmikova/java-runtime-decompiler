@@ -2,6 +2,7 @@ package org.jrd.frontend.frame.main;
 
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
+import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
@@ -232,7 +233,7 @@ public class DecompilationController {
 
     private void cleanup() {
         mainFrameView.switchPanel(false);
-        mainFrameView.getBytecodeDecompilerView().reloadClassList(new String[0]);
+        mainFrameView.getBytecodeDecompilerView().reloadClassList(new ClassInfo[0]);
         mainFrameView.getBytecodeDecompilerView().reloadTextField("", "", new byte[16]);
         haltAgent();
     }
@@ -259,9 +260,7 @@ public class DecompilationController {
         AgentRequestAction request = createRequest(RequestAction.CLASSES_WITH_INFO, "");
         String response = submitRequest(request);
         if ("ok".equals(response)) {
-            VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
-            String[] classes = vmStatus.getLoadedClassNames();
-            bytecodeDecompilerView.reloadClassList(classes);
+            bytecodeDecompilerView.reloadClassList(vmInfo.getVmDecompilerStatus().getLoadedClasses());
         }
         hideLoadingDialog();
         if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {

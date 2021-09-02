@@ -15,7 +15,7 @@ public class InstrumentationProvider {
     private final Transformer transformer;
     private final Instrumentation instrumentation;
 
-    private final static String INFO_DELIMITER = "|";
+    private static final String INFO_DELIMITER = "|";
 
     InstrumentationProvider(Instrumentation inst, Transformer transformer) {
         this.transformer = transformer;
