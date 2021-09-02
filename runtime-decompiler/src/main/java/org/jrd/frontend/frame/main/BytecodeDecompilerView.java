@@ -596,7 +596,9 @@ public class BytecodeDecompilerView {
             }
         }
 
+        ClassInfo originalSelection = filteredClassesJList.getSelectedValue();
         filteredClassesJList.setListData(filtered.toArray(new ClassInfo[0]));
+        filteredClassesJList.setSelectedValue(originalSelection, true);
     }
 
     /**
