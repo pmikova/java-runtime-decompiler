@@ -256,7 +256,7 @@ public class DecompilationController {
      */
     private void loadClassNames() {
         showLoadingDialog();
-        AgentRequestAction request = createRequest(RequestAction.CLASSES, "");
+        AgentRequestAction request = createRequest(RequestAction.CLASSES_WITH_INFO, "");
         String response = submitRequest(request);
         if ("ok".equals(response)) {
             VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
@@ -390,6 +390,7 @@ public class DecompilationController {
 
         switch (action) {
             case CLASSES:
+            case CLASSES_WITH_INFO:
             case HALT:
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
                 break;

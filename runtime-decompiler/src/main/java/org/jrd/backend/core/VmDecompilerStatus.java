@@ -13,12 +13,12 @@ public class VmDecompilerStatus {
     private String vmId;
     private String hostname;
     private int listenPort;
-    private String[] loadedClassNames;
+    private ClassInfo[] loadedClasses;
     private String loadedClassBytes;
 
     public VmDecompilerStatus() {
         this.loadedClassBytes = "";
-        this.loadedClassNames = new String[]{};
+        this.loadedClasses = new ClassInfo[]{};
     }
 
     public String getVmId() {
@@ -45,23 +45,23 @@ public class VmDecompilerStatus {
         return listenPort;
     }
 
-    public void setLoadedClassNames(String[] loadedClassNames) {
-        this.loadedClassNames = Arrays.copyOf(loadedClassNames, loadedClassNames.length);
-
+    public void setLoadedClasses(ClassInfo[] loadedClassNames) {
+        this.loadedClasses = Arrays.copyOf(loadedClassNames, loadedClassNames.length);
     }
 
     public String getLoadedClassBytes() {
         return loadedClassBytes;
     }
 
-
     public String[] getLoadedClassNames() {
-        return Arrays.copyOf(loadedClassNames, loadedClassNames.length);
+        return Arrays.stream(loadedClasses).map(ClassInfo::getName).toArray(String[]::new);
     }
 
+    public ClassInfo[] getLoadedClasses() {
+        return Arrays.copyOf(loadedClasses, loadedClasses.length);
+    }
 
     public void setLoadedClassBytes(String value) {
         loadedClassBytes = value;
     }
-
 }
