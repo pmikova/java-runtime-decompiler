@@ -148,6 +148,7 @@ public class BytecodeDecompilerView {
 
         filteredClassesJList = new JList<>();
         filteredClassesJList.setCellRenderer(filteredClassesRenderer);
+        filteredClassesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         filteredClassesJList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
