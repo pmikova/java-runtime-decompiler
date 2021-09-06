@@ -10,12 +10,18 @@ public class ClassListRenderer extends JPanel implements ListCellRenderer<ClassI
 
     JLabel name;
     JLabel location;
+    JLabel classLoader;
     boolean doShowInfo;
 
     public ClassListRenderer() {
         name = new JLabel();
         location = new JLabel();
-        location.setFont(location.getFont().deriveFont(10.0F));
+        classLoader = new JLabel();
+
+        Font infoFont = location.getFont().deriveFont(10.0F);
+
+        location.setFont(infoFont);
+        classLoader.setFont(infoFont);
 
         this.setLayout(new GridBagLayout());
 
@@ -34,6 +40,10 @@ public class ClassListRenderer extends JPanel implements ListCellRenderer<ClassI
         gbc.gridy = 1;
         this.add(location, gbc);
 
+        gbc.weighty = 0.5;
+        gbc.gridy = 2;
+        this.add(classLoader, gbc);
+
         this.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
     }
 
@@ -47,9 +57,13 @@ public class ClassListRenderer extends JPanel implements ListCellRenderer<ClassI
             location.setText("Location: " + classInfo.getLocation() + " "); // trailing space to prevent font cutoff
             location.setVisible(true);
 
+            classLoader.setText("Class loader: " + classInfo.getClassLoader() + " ");
+            classLoader.setVisible(true);
+
             this.setPreferredSize(null);
         } else {
             location.setVisible(false);
+            classLoader.setVisible(false);
 
             this.setPreferredSize(null);
         }
