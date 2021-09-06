@@ -154,7 +154,7 @@ public class BytecodeDecompilerView {
             public void mouseClicked(MouseEvent e) {
                 final String name = filteredClassesJList.getSelectedValue().getName();
                 if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
-                    classWorker(name);
+                    bytesWorker(name);
                 }
             }
         });
@@ -165,7 +165,7 @@ public class BytecodeDecompilerView {
                 if (CLASS_LIST_REGISTERED_KEY_CODES.contains(e.getKeyCode())) {
                     final String name = filteredClassesJList.getSelectedValue().getName();
                     if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
-                        classWorker(name);
+                        bytesWorker(name);
                     }
                 }
             }
@@ -715,7 +715,7 @@ public class BytecodeDecompilerView {
         return new Dimension(originalButton.getPreferredSize().width, referenceTextField.getPreferredSize().height);
     }
 
-    private void classWorker(String name) {
+    private void bytesWorker(String name) {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
