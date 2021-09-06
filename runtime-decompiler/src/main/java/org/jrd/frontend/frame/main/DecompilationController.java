@@ -257,7 +257,10 @@ public class DecompilationController {
      */
     private void loadClassNames() {
         showLoadingDialog();
-        AgentRequestAction request = createRequest(RequestAction.CLASSES_WITH_INFO, "");
+        AgentRequestAction request = createRequest(
+                bytecodeDecompilerView.doShowClassInfo() ? RequestAction.CLASSES_WITH_INFO : RequestAction.CLASSES,
+                ""
+        );
         String response = submitRequest(request);
         if ("ok".equals(response)) {
             bytecodeDecompilerView.reloadClassList(vmInfo.getVmDecompilerStatus().getLoadedClasses());

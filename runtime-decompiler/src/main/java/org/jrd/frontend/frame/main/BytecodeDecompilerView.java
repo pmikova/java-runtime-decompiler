@@ -197,25 +197,7 @@ public class BytecodeDecompilerView {
         overwriteButton.setPreferredSize(buttonSizeBasedOnTextField(overwriteButton, classesSortField));
 
         reloadClassesButton = new JButton("Reload classes");
-        reloadClassesButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        try {
-                            ActionEvent event = new ActionEvent(this, 2, null);
-
-
-                            classesActionListener.actionPerformed(event);
-                        } catch (Throwable t) {
-                            Logger.getLogger().log(Logger.Level.ALL, t);
-                        }
-                        return null;
-                    }
-                }.execute();
-            }
-        });
+        reloadClassesButton.addActionListener(e -> classWorker());
         reloadClassesButton.setPreferredSize(buttonSizeBasedOnTextField(reloadClassesButton, classesSortField));
 
         buffers = new JTabbedPane();
@@ -367,7 +349,9 @@ public class BytecodeDecompilerView {
     }
 
     private void handleClassInfoSwitching() {
-        filteredClassesRenderer.setDoShowInfo(showInfoCheckBox.isSelected());
+        classWorker();
+
+        filteredClassesRenderer.setDoShowInfo(doShowClassInfo());
 
         // invalidate JList cache
         filteredClassesJList.setFixedCellWidth(1);
@@ -580,7 +564,7 @@ public class BytecodeDecompilerView {
             classesSortField.repaint();
 
             for (ClassInfo clazz : loadedClasses) {
-                Matcher m = p.matcher(clazz.getSearchableString(showInfoCheckBox.isSelected()));
+                Matcher m = p.matcher(clazz.getSearchableString(doShowClassInfo()));
                 if (m.matches()) {
                     filtered.add(clazz);
                 }
@@ -591,7 +575,7 @@ public class BytecodeDecompilerView {
 
             // regex is invalid => just use .contains()
             for (ClassInfo clazz : loadedClasses) {
-                if (!clazz.getSearchableString(showInfoCheckBox.isSelected()).contains(filter)) {
+                if (!clazz.getSearchableString(doShowClassInfo()).contains(filter)) {
                     filtered.add(clazz);
                 }
             }
@@ -715,6 +699,21 @@ public class BytecodeDecompilerView {
         return new Dimension(originalButton.getPreferredSize().width, referenceTextField.getPreferredSize().height);
     }
 
+    private void classWorker() {
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    ActionEvent event = new ActionEvent(this, 2, null);
+                    classesActionListener.actionPerformed(event);
+                } catch (Throwable t) {
+                    Logger.getLogger().log(Logger.Level.ALL, t);
+                }
+                return null;
+            }
+        }.execute();
+    }
+
     private void bytesWorker(String name) {
         new SwingWorker<Void, Void>() {
             @Override
@@ -728,5 +727,9 @@ public class BytecodeDecompilerView {
                 return null;
             }
         }.execute();
+    }
+
+    public boolean doShowClassInfo() {
+        return showInfoCheckBox.isSelected();
     }
 }
