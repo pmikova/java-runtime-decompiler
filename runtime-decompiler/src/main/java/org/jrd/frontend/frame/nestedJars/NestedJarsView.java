@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.nestedJars;
 
 import org.jrd.backend.data.ArchiveManagerOptions;
+import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.*;
@@ -66,6 +67,7 @@ public class NestedJarsView extends JDialog {
 					list.setEnabled(true);
 				}
 			});
+			useDefaults.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Default extensions that are searched are: .zip, .jar, .war, .ear");
 
 			// Setup
 			List<String> l = ArchiveManagerOptions.getInstance().getExtensions();
