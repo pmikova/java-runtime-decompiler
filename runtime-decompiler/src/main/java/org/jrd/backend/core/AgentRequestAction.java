@@ -53,7 +53,8 @@ public class AgentRequestAction {
         CLASSES(0),
         BYTES(1),
         HALT(2),
-        OVERWRITE(3);
+        OVERWRITE(3),
+        CLASSINFOS(4);
 
         private final int intVal;
 
@@ -83,6 +84,8 @@ public class AgentRequestAction {
                     return HALT;
                 case 3:
                     return OVERWRITE;
+                case 4:
+                    return CLASSINFOS;
                 default:
                     throw new IllegalArgumentException("Unknown request: " + action);
             }

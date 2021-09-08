@@ -23,8 +23,8 @@ public class InstrumentationProvider {
     InstrumentationProvider(Instrumentation inst, Transformer transformer) {
         this.transformer = transformer;
         this.instrumentation = inst;
-    }    
-        
+    }
+
     public void setClassBody(String cname, byte[] nwBody) throws UnmodifiableClassException {
         Class clazz = findClass(cname);
         transformer.allowToSaveBytecode();
@@ -47,16 +47,15 @@ public class InstrumentationProvider {
             String nameWithSlashes = clazz.getName().replace(".", "/");
             result = transformer.getResult(nameWithSlashes);
         } catch (RuntimeException ex) {
-            throw new RuntimeException(ex); //?? same exception?
+            throw new RuntimeException(ex); // ?? same exception?
         }
-        transformer.denyToSaveBytecode(); //should be in finally?
+        transformer.denyToSaveBytecode(); // should be in finally?
         transformer.resetLastValidResult();
         return result;
     }
 
     /**
-     * Finds class object corresponding to the class name and returns its
-     * bytecode.
+     * Finds class object corresponding to the class name and returns its bytecode.
      *
      * @param className name of class we want to get
      * @return bytecode of given class
@@ -78,8 +77,8 @@ public class InstrumentationProvider {
     }
 
     /**
-     * Inserts names of classes into queue.
-     * Stops execution when it receives abort signal.
+     * Inserts names of classes into queue. Stops execution when it receives abort
+     * signal.
      *
      * @param queue output queue
      * @param abort abort signal
@@ -94,5 +93,23 @@ public class InstrumentationProvider {
             }
         }
         queue.put("---END---");
+    }
+
+    public void getClasses(LinkedBlockingQueue<String[]> queue, Boolean abort) throws InterruptedException {
+        Class[] loadedClasses = instrumentation.getAllLoadedClasses();
+        for (Class loadedClass : loadedClasses) {
+            String[] temp = new String[2];
+            temp[0] = loadedClass.getName();
+            try {
+                temp[1] = loadedClass.getProtectionDomain().getCodeSource().getLocation().getPath();
+            } catch (Exception ex) {
+                temp[1] = "Null location";
+            }
+            queue.put(temp);
+            if (abort) {
+                break;
+            }
+        }
+        queue.put(new String[] { "---END---", "---END---" });
     }
 }

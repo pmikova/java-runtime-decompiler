@@ -138,6 +138,24 @@ public class Communicate {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,"Agent returned class names.");
             return str.toString();
             // Agent shutdown response
+        } else if(initLine.equals("CLASSINFOS")){
+            StringBuilder str = new StringBuilder();
+            while (true) {
+                try {
+                    String s = this.commInput.readLine();
+                    if (s == null) {
+                        break;
+                    }
+                    s = s.trim();
+                    if (!s.isEmpty()) {
+                        str.append(s).append(";");
+                    }
+                } catch (IOException ex) {
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
+                }
+            }
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,"Agent returned class names.");
+            return str.toString();
         } else if (initLine.equals("GOODBYE")) {
             return "OK";
             //generic done for non-returning  commands. Eg overwrite response. Made this confirmation more  granular? done-overwrite?

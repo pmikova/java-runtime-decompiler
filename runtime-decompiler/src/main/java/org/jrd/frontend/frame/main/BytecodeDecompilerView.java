@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.FileWriter;
 
 /**
  * Class that creates GUI for attached VM.
@@ -554,6 +555,35 @@ public class BytecodeDecompilerView {
     public void reloadClassList(String[] classesToReload) {
         loadedClasses = Arrays.copyOf(classesToReload, classesToReload.length);
         SwingUtilities.invokeLater(() -> updateClassList());
+    }
+
+    public void writeClassInfos(List<String[]> classInfo) {
+        StringBuilder sb = new StringBuilder();
+        for (String[] ss : classInfo) {
+            switch (ss.length) {
+            case 0:
+                continue;
+            case 1:
+                System.out.println(ss[0]);
+                sb.append(ss[0] + '\n');
+                break;
+            case 2:
+                System.out.println(ss[0] + "," + ss[1]);
+                sb.append(ss[0] + "," + ss[1] + '\n');
+                break;
+            default:
+                System.out.println("Uh oh");
+            }
+        }
+
+        try {
+            FileWriter writer = new FileWriter("ClassInfo.csv");
+            writer.write(sb.toString());
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**

@@ -76,6 +76,9 @@ public class DecompilerRequestReceiver {
             case CLASSES:
                 response = getAllLoadedClassesAction(hostname, port, vmId, vmPid);
                 break;
+            case CLASSINFOS:
+                response = getAllLoadedClassInfosAction(hostname, port, vmId, vmPid);
+                break;
             case HALT:
                 response = getHaltAction(hostname, port, vmId, vmPid);
                 break;
@@ -199,7 +202,24 @@ public class DecompilerRequestReceiver {
             return ERROR_RESPONSE;
         }
         return OK_RESPONSE;
+    }
 
+    private String getAllLoadedClassInfosAction(String hostname, int listenPort, String vmId, int vmPid){
+        try {
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "CLASSINFOS");
+            List<String[]> arrayOfClasses = parseClassInfos(reply.response);
+
+            VmDecompilerStatus status = new VmDecompilerStatus();
+            status.setHostname(hostname);
+            status.setListenPort(reply.port);
+            status.setVmId(vmId);
+            status.setLoadedClassInfos(arrayOfClasses);
+            vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
+        } catch (Exception ex) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+            return ERROR_RESPONSE;
+        }
+        return OK_RESPONSE;
     }
 
     private String getHaltAction(String hostname, int listenPort, String vmId, int vmPid) {
@@ -278,4 +298,14 @@ public class DecompilerRequestReceiver {
             return o1.compareTo(o2);
         }
     }
+    private List<String[]> parseClassInfos(String classInfos){
+        String[] array = classInfos.split(";");
+        List<String[]> list = new ArrayList<>();
+        for(String s : array){
+            String[] classInfo = s.split(",");
+            list.add(classInfo);
+        }
+        return list;
+    }
+
 }
