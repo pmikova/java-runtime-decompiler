@@ -43,7 +43,9 @@ public class NestedJarsView extends JDialog {
 
 			addButton = new JButton("ADD");
 			addButton.addActionListener(actionEvent -> {
-				dList.addElement(textField.getText());
+				for (String s : textField.getText().split( " ")) {
+					dList.addElement(s);
+				}
 				textField.setText("");
 			});
 
