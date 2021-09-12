@@ -67,40 +67,28 @@ public class ConfigureView extends JDialog {
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.BOTH;
 
+            gbc.insets = new Insets(0,20,0,0);
             gbc.gridx = 1;
             this.add(this.agentPathLabel, gbc);
 
-            gbc.gridx = 0;
-            gbc.gridy = 1;
-            this.add(Box.createHorizontalStrut(20), gbc);
-
+            gbc.insets = new Insets(5,20,0,0);
             gbc.weightx = 1;
             gbc.gridx = 1;
             this.add(agentPathTextField, gbc);
 
-            gbc.weightx = 0;
+            gbc.insets = new Insets(0,20,0,20);
             gbc.gridx = 2;
-            this.add(Box.createHorizontalStrut(20), gbc);
-
-            gbc.gridx = 3;
+            gbc.gridy = 1;
             this.add(browseButton, gbc);
 
-            gbc.gridx = 4;
-            this.add(Box.createHorizontalStrut(20), gbc);
-
-            gbc.gridx = 0;
-            gbc.gridy = 2;
-            this.add(Box.createVerticalStrut(20), gbc);
-
+            gbc.insets = new Insets(20,20,0,0);
             gbc.gridx = 1;
             gbc.gridy = 3;
             this.add(checkBoxSettings, gbc);
 
-            gbc.gridx = 0;
-            gbc.gridy = 4;
-            this.add(Box.createHorizontalStrut(20), gbc);
-
+            gbc.insets = new Insets(5,20,0,0);
             gbc.gridx = 1;
+            gbc.gridy = 4;
             this.add(useHostSystemClassesCheckBox, gbc);
 
             this.setPreferredSize(new Dimension(0, 150));
