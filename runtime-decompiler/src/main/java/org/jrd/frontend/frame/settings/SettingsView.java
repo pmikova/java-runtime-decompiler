@@ -1,6 +1,7 @@
-package org.jrd.frontend.frame.agent;
+package org.jrd.frontend.frame.settings;
 
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.ArchiveManagerOptions;
 import org.jrd.backend.data.Config;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.MainFrameView;
@@ -10,23 +11,26 @@ import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.jrd.backend.data.Directories.getJrdLocation;
 import static org.jrd.backend.data.Directories.isPortable;
 import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.fallback;
 import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.getTextFieldToolTip;
 
-public class ConfigureView extends JDialog {
+public class SettingsView extends JDialog {
 
     private JPanel mainPanel;
-        private ConfigurePanel configurePanel;
+        private SettingsPanel settingsPanel;
         private JPanel okCancelPanel;
             private JButton okButton;
             private JButton cancelButton;
 
     private final Config config = Config.getConfig();
 
-    public static class ConfigurePanel extends JPanel {
+    public static class SettingsPanel extends JPanel {
 
         public JTextField agentPathTextField;
         public JLabel agentPathLabel;
@@ -36,7 +40,16 @@ public class ConfigureView extends JDialog {
 
         public JFileChooser chooser;
 
-        ConfigurePanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
+        public JCheckBox useDefaults;
+        public JTextField newExtensionsTextField;
+        public JLabel nestedJars;
+        public JButton addButton;
+        public JButton removeButton;
+        public JList list;
+        public JScrollPane scrollPane;
+        DefaultListModel dList;
+
+        SettingsPanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
 
             this.agentPathTextField = new JTextField();
             this.agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
@@ -67,64 +80,131 @@ public class ConfigureView extends JDialog {
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.BOTH;
 
+            gbc.insets = new Insets(0,20,0,0);
             gbc.gridx = 1;
             this.add(this.agentPathLabel, gbc);
 
-            gbc.gridx = 0;
-            gbc.gridy = 1;
-            this.add(Box.createHorizontalStrut(20), gbc);
-
+            gbc.insets = new Insets(5,20,0,0);
             gbc.weightx = 1;
             gbc.gridx = 1;
             this.add(agentPathTextField, gbc);
 
-            gbc.weightx = 0;
+            gbc.insets = new Insets(0,20,0,20);
             gbc.gridx = 2;
-            this.add(Box.createHorizontalStrut(20), gbc);
-
-            gbc.gridx = 3;
+            gbc.gridy = 1;
             this.add(browseButton, gbc);
 
-            gbc.gridx = 4;
-            this.add(Box.createHorizontalStrut(20), gbc);
-
-            gbc.gridx = 0;
-            gbc.gridy = 2;
-            this.add(Box.createVerticalStrut(20), gbc);
-
+            gbc.insets = new Insets(20,20,0,0);
             gbc.gridx = 1;
             gbc.gridy = 3;
             this.add(checkBoxSettings, gbc);
 
-            gbc.gridx = 0;
-            gbc.gridy = 4;
-            this.add(Box.createHorizontalStrut(20), gbc);
-
+            gbc.insets = new Insets(5,20,0,0);
             gbc.gridx = 1;
+            gbc.gridy = 4;
             this.add(useHostSystemClassesCheckBox, gbc);
 
-            this.setPreferredSize(new Dimension(0, 150));
+            // Nested Jars
+            nestedJars = new JLabel("Nested Jars Settings:");
+            newExtensionsTextField = new JTextField();
+
+            dList = new DefaultListModel();
+            list = new JList(dList);
+            list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            list.setLayoutOrientation(JList.VERTICAL);
+            list.setVisibleRowCount(-1);
+
+            scrollPane = new JScrollPane(list);
+            scrollPane.setPreferredSize(new Dimension(0, 200));
+
+            addButton = new JButton("ADD");
+            addButton.addActionListener(actionEvent -> {
+                for (String s : newExtensionsTextField.getText().split( "\\s")) {
+                    dList.addElement(s);
+                }
+                newExtensionsTextField.setText("");
+            });
+
+            removeButton = new JButton("REMOVE");
+            removeButton.addActionListener(actionEvent -> {
+                int index = list.getSelectedIndex();
+                dList.removeElementAt(index);
+            });
+
+            useDefaults = new JCheckBox("Use default extensions");
+            useDefaults.addItemListener(itemEvent -> {
+                newExtensionsTextField.setEnabled(!useDefaults.isSelected());
+                addButton.setEnabled(!useDefaults.isSelected());
+                removeButton.setEnabled(!useDefaults.isSelected());
+                list.setEnabled(!useDefaults.isSelected());
+            });
+            useDefaults.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Default extensions that are searched are: .zip, .jar, .war, .ear");
+
+            // Setup
+            List<String> l = ArchiveManagerOptions.getInstance().getExtensions();
+            if (l == null || l.isEmpty()) {
+                useDefaults.setSelected(true);
+            } else {
+                dList.addAll(l);
+            }
+
+            gbc.insets = new Insets(30, 20, 0, 0);
+            gbc.gridy = 5;
+            this.add(nestedJars, gbc);
+
+            gbc.insets = new Insets(10, 20, 0, 0);
+            gbc.gridy = 6;
+            this.add(useDefaults, gbc);
+
+            gbc.insets = new Insets(5, 20, 0, 20);
+            gbc.gridy = 7;
+            gbc.weighty = 1.0;
+            gbc.gridwidth = 3;
+            this.add(scrollPane, gbc);
+
+            gbc.insets = new Insets(5,20,0,0);
+            gbc.weighty = 0;
+            gbc.gridy = 8;
+            gbc.gridwidth = 1;
+            this.add(newExtensionsTextField, gbc);
+
+            gbc.insets = new Insets(5,5,0,0);
+            gbc.gridx = 2;
+            this.add(addButton, gbc);
+
+            gbc.insets = new Insets(5,5,0,20);  //top padding
+            gbc.gridx = 3;
+            this.add(removeButton, gbc);
+
+            this.setPreferredSize(new Dimension(0, 400));
         }
     }
 
-    public ConfigureView(MainFrameView mainFrameView) {
-        configurePanel = new ConfigurePanel(config.getAgentRawPath(), config.doUseHostSystemClasses());
-        configurePanel.browseButton.addActionListener(actionEvent -> {
-            int dialogResult = configurePanel.chooser.showOpenDialog(configurePanel);
+    public SettingsView(MainFrameView mainFrameView) {
+        settingsPanel = new SettingsPanel(config.getAgentRawPath(), config.doUseHostSystemClasses());
+        settingsPanel.browseButton.addActionListener(actionEvent -> {
+            int dialogResult = settingsPanel.chooser.showOpenDialog(settingsPanel);
             if (dialogResult == JFileChooser.APPROVE_OPTION) {
-                configurePanel.agentPathTextField.setText(configurePanel.chooser.getSelectedFile().getPath());
+                settingsPanel.agentPathTextField.setText(settingsPanel.chooser.getSelectedFile().getPath());
             }
         });
 
         okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
-            config.setAgentPath(configurePanel.agentPathTextField.getText());
-            config.setUseHostSystemClasses(configurePanel.useHostSystemClassesCheckBox.isSelected());
+            config.setAgentPath(settingsPanel.agentPathTextField.getText());
+            config.setUseHostSystemClasses(settingsPanel.useHostSystemClassesCheckBox.isSelected());
 
             try {
                 config.saveConfigFile();
             } catch (IOException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            }
+
+            if (settingsPanel.useDefaults.isSelected()) {
+                ArchiveManagerOptions.getInstance().setExtension(new ArrayList<String>());
+            } else {
+                List<String> ext = Collections.list(settingsPanel.dList.elements());
+                ArchiveManagerOptions.getInstance().setExtension(ext);
             }
             dispose();
         });
@@ -169,7 +249,7 @@ public class ConfigureView extends JDialog {
         gbc.weighty = 0;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        mainPanel.add(configurePanel, gbc);
+        mainPanel.add(settingsPanel, gbc);
 
         gbc.gridy = 1;
         gbc.weighty = 1;
@@ -179,9 +259,9 @@ public class ConfigureView extends JDialog {
         gbc.weighty = 0;
         mainPanel.add(okCancelPanel, gbc);
 
-        this.setTitle("Configure Decompiler Agent");
-        this.setSize(new Dimension(800, 400));
-        this.setMinimumSize(new Dimension(250, 330));
+        this.setTitle("Settings");
+        this.setSize(new Dimension(800, 500));
+        this.setMinimumSize(new Dimension(250, 500));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
         this.setModalityType(ModalityType.APPLICATION_MODAL);

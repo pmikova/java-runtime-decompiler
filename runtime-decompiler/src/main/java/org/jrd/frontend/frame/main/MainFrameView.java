@@ -3,7 +3,7 @@ package org.jrd.frontend.frame.main;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
-import org.jrd.frontend.frame.agent.ConfigureView;
+import org.jrd.frontend.frame.settings.SettingsView;
 import org.jrd.frontend.frame.license.LicenseView;
 
 import javax.swing.*;
@@ -57,7 +57,7 @@ public class MainFrameView {
         private JMenu jMenuConnect;
             private JMenuItem jMenuItemNewConnection;
         private JMenu jMenuConfig;
-            private JMenuItem jMenuItemConfigure;
+            private JMenuItem jMenuSettings;
             private JMenuItem jMenuPluginEditor;
         private JMenu jMenuHelp;
             private JMenuItem jMenuItemAbout;
@@ -303,11 +303,11 @@ public class MainFrameView {
         // jMenuConnect end
 
         jMenuConfig = new JMenu("Configure");
-        jMenuItemConfigure = new JMenuItem("Decompiler Agent");
-        jMenuItemConfigure.addActionListener(actionEvent -> {
-            new ConfigureView(this);
+        jMenuSettings = new JMenuItem("Settings");
+        jMenuSettings.addActionListener(actionEvent -> {
+            new SettingsView(this);
         });
-        jMenuConfig.add(jMenuItemConfigure);
+        jMenuConfig.add(jMenuSettings);
         jMenuPluginEditor = new JMenuItem("Plugins");
         jMenuPluginEditor.addActionListener(actionEvent -> {
             pluginConfigurationEditorListener.actionPerformed(actionEvent);
