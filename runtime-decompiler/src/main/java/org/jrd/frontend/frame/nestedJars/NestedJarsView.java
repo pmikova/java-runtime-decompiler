@@ -7,7 +7,6 @@ import org.jrd.frontend.frame.main.MainFrameView;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
-import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,17 +56,10 @@ public class NestedJarsView extends JDialog {
 
 			useDefaults = new JCheckBox("Use default extensions");
 			useDefaults.addItemListener(itemEvent -> {
-				if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
-					textField.setEnabled(false);
-					addButton.setEnabled(false);
-					removeButton.setEnabled(false);
-					list.setEnabled(false);
-				} else {
-					textField.setEnabled(true);
-					addButton.setEnabled(true);
-					removeButton.setEnabled(true);
-					list.setEnabled(true);
-				}
+				textField.setEnabled(!useDefaults.isSelected());
+				addButton.setEnabled(!useDefaults.isSelected());
+				removeButton.setEnabled(!useDefaults.isSelected());
+				list.setEnabled(!useDefaults.isSelected());
 			});
 			useDefaults.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Default extensions that are searched are: .zip, .jar, .war, .ear");
 
