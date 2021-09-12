@@ -1,4 +1,4 @@
-package org.jrd.frontend.frame.agent;
+package org.jrd.frontend.frame.settings;
 
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Config;
@@ -16,17 +16,17 @@ import static org.jrd.backend.data.Directories.isPortable;
 import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.fallback;
 import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.getTextFieldToolTip;
 
-public class ConfigureView extends JDialog {
+public class SettingsView extends JDialog {
 
     private JPanel mainPanel;
-        private ConfigurePanel configurePanel;
+        private SettingsPanel settingsPanel;
         private JPanel okCancelPanel;
             private JButton okButton;
             private JButton cancelButton;
 
     private final Config config = Config.getConfig();
 
-    public static class ConfigurePanel extends JPanel {
+    public static class SettingsPanel extends JPanel {
 
         public JTextField agentPathTextField;
         public JLabel agentPathLabel;
@@ -36,7 +36,7 @@ public class ConfigureView extends JDialog {
 
         public JFileChooser chooser;
 
-        ConfigurePanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
+        SettingsPanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
 
             this.agentPathTextField = new JTextField();
             this.agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
@@ -95,19 +95,19 @@ public class ConfigureView extends JDialog {
         }
     }
 
-    public ConfigureView(MainFrameView mainFrameView) {
-        configurePanel = new ConfigurePanel(config.getAgentRawPath(), config.doUseHostSystemClasses());
-        configurePanel.browseButton.addActionListener(actionEvent -> {
-            int dialogResult = configurePanel.chooser.showOpenDialog(configurePanel);
+    public SettingsView(MainFrameView mainFrameView) {
+        settingsPanel = new SettingsPanel(config.getAgentRawPath(), config.doUseHostSystemClasses());
+        settingsPanel.browseButton.addActionListener(actionEvent -> {
+            int dialogResult = settingsPanel.chooser.showOpenDialog(settingsPanel);
             if (dialogResult == JFileChooser.APPROVE_OPTION) {
-                configurePanel.agentPathTextField.setText(configurePanel.chooser.getSelectedFile().getPath());
+                settingsPanel.agentPathTextField.setText(settingsPanel.chooser.getSelectedFile().getPath());
             }
         });
 
         okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
-            config.setAgentPath(configurePanel.agentPathTextField.getText());
-            config.setUseHostSystemClasses(configurePanel.useHostSystemClassesCheckBox.isSelected());
+            config.setAgentPath(settingsPanel.agentPathTextField.getText());
+            config.setUseHostSystemClasses(settingsPanel.useHostSystemClassesCheckBox.isSelected());
 
             try {
                 config.saveConfigFile();
@@ -157,7 +157,7 @@ public class ConfigureView extends JDialog {
         gbc.weighty = 0;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        mainPanel.add(configurePanel, gbc);
+        mainPanel.add(settingsPanel, gbc);
 
         gbc.gridy = 1;
         gbc.weighty = 1;
@@ -167,7 +167,7 @@ public class ConfigureView extends JDialog {
         gbc.weighty = 0;
         mainPanel.add(okCancelPanel, gbc);
 
-        this.setTitle("Configure Decompiler Agent");
+        this.setTitle("Settings");
         this.setSize(new Dimension(800, 400));
         this.setMinimumSize(new Dimension(250, 330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
