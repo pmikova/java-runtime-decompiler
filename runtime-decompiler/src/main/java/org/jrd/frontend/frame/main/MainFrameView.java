@@ -5,7 +5,6 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
 import org.jrd.frontend.frame.settings.SettingsView;
 import org.jrd.frontend.frame.license.LicenseView;
-import org.jrd.frontend.frame.nestedJars.NestedJarsView;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -60,7 +59,6 @@ public class MainFrameView {
         private JMenu jMenuConfig;
             private JMenuItem jMenuSettings;
             private JMenuItem jMenuPluginEditor;
-            private JMenuItem jMenuNestedJars;
         private JMenu jMenuHelp;
             private JMenuItem jMenuItemAbout;
             private JMenuItem jMenuItemUsage;
@@ -315,11 +313,6 @@ public class MainFrameView {
             pluginConfigurationEditorListener.actionPerformed(actionEvent);
         });
         jMenuConfig.add(jMenuPluginEditor);
-        jMenuNestedJars = new JMenuItem("Nested Jars");
-        jMenuNestedJars.addActionListener(actionEvent -> {
-            new NestedJarsView(this);
-        });
-        jMenuConfig.add(jMenuNestedJars);
         // jMenuConfig end
 
         jMenuHelp = new JMenu("Help");
