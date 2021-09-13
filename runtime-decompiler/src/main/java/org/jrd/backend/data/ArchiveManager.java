@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -30,6 +31,7 @@ public class ArchiveManager {
     final String tmpdir = System.getProperty("java.io.tmpdir");
     final String fileSeparator = System.getProperty("file.separator");
     ArchivePathManager pathManager = new ArchivePathManager();
+    final String jrdFolder = tmpdir + fileSeparator + "jrd-" + UUID.randomUUID().toString() + fileSeparator;
     int currentD = 0;
 
     /**
@@ -41,15 +43,11 @@ public class ArchiveManager {
      */
     public boolean isClassInFile(String clazz, File c) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(c))) {
-            if (pathManager.wasFound() && pathManager.getCurrentClazz().equals(clazz)) {
-                return true;
-            } else {
-                delete();
-                pathManager = new ArchivePathManager();
-                pathManager.setClazz(clazz);
-                pathManager.addPathPart(c.getName());
-                return findClazz(zis, clazz);
-            }
+            delete();
+            pathManager = new ArchivePathManager();
+            pathManager.setClazz(clazz);
+            pathManager.addPathPart(c.getName());
+            return findClazz(zis, clazz);
         }
     }
 
@@ -114,12 +112,12 @@ public class ArchiveManager {
      * @throws IOException Error while reading streams
      */
     public File unpack(File c) throws IOException {
-        if (pathManager.isExtracted()) {
+        /*if (pathManager.isExtracted()) {
             // If file is already extracted, return the extracted one
-            return new File(tmpdir + fileSeparator + "jrd" + fileSeparator + (pathManager.getPathSize() - 2) + fileSeparator + (pathManager.get(pathManager.getPathSize() - 1)));
-        }
+            return new File(jrdFolder + (pathManager.getPathSize() - 2) + fileSeparator + (pathManager.get(pathManager.getPathSize() - 1)));
+        }*/
 
-        File f = new File(tmpdir + fileSeparator + "jrd" + fileSeparator);
+        File f = new File(jrdFolder);
         if (f.exists() && !delete()) { // do not log if it didn't even exist before
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Could not delete jrd temp directory at '" + f.getAbsolutePath() + "'!");
         }
@@ -144,7 +142,7 @@ public class ArchiveManager {
      * @throws IOException if an I/O error occurs during unpacking
      */
     private File recursiveUnpack(File toUnpack) throws IOException {
-        File destDir = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + currentD);
+        File destDir = new File(jrdFolder + currentD);
         if (!destDir.mkdir() && !destDir.exists()) {
             throw new IOException("Could not create directory '" + destDir.getAbsolutePath() + "'");
         }
@@ -213,10 +211,10 @@ public class ArchiveManager {
         for (; i >= 0; i--) {
             // Create new zip that will contain edited files
             String[] tmp = pathManager.get(i).split(Pattern.quote(fileSeparator));
-            String path = tmpdir + fileSeparator + "jrd" + fileSeparator + tmp[tmp.length - 1] + fileSeparator;
+            String path = jrdFolder + tmp[tmp.length - 1] + fileSeparator;
             FileOutputStream fileStream = new FileOutputStream(path);
             ZipOutputStream zOut = new ZipOutputStream(fileStream);
-            File f2zip = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + (i));
+            File f2zip = new File(jrdFolder + (i));
             File[] children = f2zip.listFiles();
 
             if (children != null) {
@@ -230,7 +228,7 @@ public class ArchiveManager {
             fileStream.close();
             // Move it into the temp file if it's not last, so it can be packaged
             if (i > 0) {
-                Files.copy(Path.of(path), Path.of(tmpdir + fileSeparator + "jrd" + fileSeparator + (i - 1) + fileSeparator + pathManager.get(i)), REPLACE_EXISTING);
+                Files.copy(Path.of(path), Path.of(jrdFolder + (i - 1) + fileSeparator + pathManager.get(i)), REPLACE_EXISTING);
             } else {
                 // It's the last, replace the original
                 Files.copy(Path.of(path), c.toPath(), REPLACE_EXISTING);
@@ -287,7 +285,7 @@ public class ArchiveManager {
      */
     public boolean delete() {
         currentD = 0;
-        return deleteRecursive(new File(tmpdir + fileSeparator + "jrd" + fileSeparator));
+        return deleteRecursive(new File(jrdFolder));
     }
 
     /**
