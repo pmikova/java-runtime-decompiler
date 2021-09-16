@@ -6,6 +6,7 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
 import org.jrd.frontend.frame.agent.ConfigureView;
 import org.jrd.frontend.frame.license.LicenseView;
+import org.jrd.frontend.frame.main.renderer.VmListRenderer;
 import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;

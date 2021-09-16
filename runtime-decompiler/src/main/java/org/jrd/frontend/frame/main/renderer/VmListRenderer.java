@@ -1,6 +1,7 @@
-package org.jrd.frontend.frame.main;
+package org.jrd.frontend.frame.main.renderer;
 
 import org.jrd.backend.data.VmInfo;
+import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

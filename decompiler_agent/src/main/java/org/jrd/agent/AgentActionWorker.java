@@ -84,7 +84,10 @@ public class AgentActionWorker extends Thread {
                         AgentLogger.getLogger().log("Agent received HALT command, closing socket and exiting.");
                         break;
                     case "CLASSES":
-                        getAllLoadedClasses(outputStream);
+                        getAllLoadedClasses(outputStream, false);
+                        break;
+                    case "CLASSES_WITH_INFO":
+                        getAllLoadedClasses(outputStream, true);
                         break;
                     case "BYTES":
                         sendByteCode(inputStream, outputStream);
@@ -109,13 +112,13 @@ public class AgentActionWorker extends Thread {
         }
     }
 
-    private void getAllLoadedClasses(BufferedWriter out) throws IOException {
+    private void getAllLoadedClasses(BufferedWriter out, boolean doGetInfo) throws IOException {
         out.write("CLASSES");
         out.newLine();
         LinkedBlockingQueue<String> classNames = new LinkedBlockingQueue<String>(1024);
         new Thread(() -> {
             try {
-                provider.getClassesNames(classNames, abort);
+                provider.getClasses(classNames, abort, doGetInfo);
             } catch (InterruptedException e) {
                 AgentLogger.getLogger().log(e);
             }
