@@ -257,10 +257,6 @@ public class Cli {
 
         @SuppressWarnings("ModifiedControlVariable") // shifting arguments when parsing
         CompileArguments() throws FileNotFoundException {
-            if (filteredArgs.size() < 2) {
-                throw new IllegalArgumentException("Expected at least one file for compile.");
-            }
-
             for (int i = 1; i < filteredArgs.size(); i++) {
                 String arg = filteredArgs.get(i);
 
@@ -281,6 +277,10 @@ public class Cli {
 
                     filesToCompile.add(fileToCompile);
                 }
+            }
+
+            if (filesToCompile.isEmpty()) {
+                throw new IllegalArgumentException("Expected at least one file for compile.");
             }
         }
 

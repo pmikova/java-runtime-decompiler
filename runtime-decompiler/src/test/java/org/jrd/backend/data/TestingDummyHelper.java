@@ -20,6 +20,7 @@ class TestingDummyHelper {
     private Process process;
 
     static final String CLASS_NAME = "TestingDummy";
+    static final String PACKAGE_NAME = "dummy.package";
     static final String TMP_DIR = System.getProperty("java.io.tmpdir");
     static final String DOT_JAVA_PATH = TMP_DIR + File.separator + CLASS_NAME + ".java";
     static final String DOT_CLASS_PATH = TMP_DIR + File.separator + CLASS_NAME + ".class";
@@ -34,8 +35,8 @@ class TestingDummyHelper {
             Pattern.MULTILINE
     );
 
-    private static final String DUMMY_CLASS_CONTENT =
-            "public class TestingDummy {\n" +
+    static final String DUMMY_CLASS_CONTENT =
+            "public class " + CLASS_NAME + " {\n" +
                     "    public static void main(String[] args) throws InterruptedException {\n" +
                     "        System.out.println(\"Hello\");\n" +
                     "        while(true) {\n" +
@@ -120,6 +121,16 @@ class TestingDummyHelper {
 
     String getPid() {
         return Long.toString(process.pid());
+    }
+
+    static String getContentWithPackage() {
+        return "package " + PACKAGE_NAME + ";\n\n" +
+                DUMMY_CLASS_CONTENT;
+    }
+
+    static String getEmptyClass() {
+        return "package " + PACKAGE_NAME + ";\n" +
+                "public class " + CLASS_NAME + " {}";
     }
 
     static class TestingDummyException extends Exception {

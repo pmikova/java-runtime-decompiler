@@ -7,13 +7,16 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -32,6 +35,7 @@ import static org.jrd.backend.data.Cli.*;
 import static org.jrd.backend.data.Help.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CliTest {
     private Model model;
     private String[] args;
@@ -85,7 +89,7 @@ public class CliTest {
         assertTrue(dummy.isAlive());
         // halt agent, otherwise an open socket prevents termination of dummy process
         AgentRequestAction request = DecompilationController.createRequest(
-                cli.getVmInfo(dummy.getPid()), AgentRequestAction.RequestAction.HALT, ""
+                model.getVmManager().findVmFromPid(dummy.getPid()), AgentRequestAction.RequestAction.HALT, ""
         );
         String response = DecompilationController.submitRequest(model.getVmManager(), request);
         assertEquals("ok", response);
@@ -131,6 +135,27 @@ public class CliTest {
         args = new String[] {UNKNOWN_FLAG};
         cli = new Cli(args, model);
         assertFalse(cli.shouldBeVerbose());
+    }
+
+    @Test
+    void testIsGui() {
+        // is gui
+        args = new String[]{};
+        cli = new Cli(args, model);
+        assertTrue(cli.isGui());
+
+        args = new String[]{VERBOSE};
+        cli = new Cli(args, model);
+        assertTrue(cli.isGui());
+
+        // is cli
+        args = new String[]{UNKNOWN_FLAG};
+        cli = new Cli(args, model);
+        assertFalse(cli.isGui());
+
+        args = new String[]{VERBOSE, UNKNOWN_FLAG};
+        cli = new Cli(args, model);
+        assertFalse(cli.isGui());
     }
 
     @Test
@@ -201,7 +226,7 @@ public class CliTest {
     }
 
     // temporarily missing COMPILE
-    private static Stream<String> operations() {
+    private static Stream<String> validOperationSource() {
         return Stream.of(
                 H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS,
                 LIST_CLASSES_FORMAT, BYTES_FORMAT, BASE64_FORMAT, DECOMPILE_FORMAT, OVERWRITE_FORMAT
@@ -209,7 +234,7 @@ public class CliTest {
     }
 
     @ParameterizedTest
-    @MethodSource("operations")
+    @MethodSource("validOperationSource")
     void testValidOperation(String operation) {
         args = processArgs(operation);
         cli = new Cli(args, model);
@@ -218,7 +243,7 @@ public class CliTest {
     }
 
     @ParameterizedTest
-    @MethodSource("operations")
+    @MethodSource("validOperationSource")
     void testValidOperationTwoSlashes(String operation) {
         args = processArgs(operation);
         args[0] = twoSlashes(args[0]);
@@ -378,6 +403,34 @@ public class CliTest {
         assertArrayEquals(bytes, decoded);
     }
 
+    private Stream<Arguments> tooFewArgumentsSource() {
+        return Stream.of(
+                new String[]{LIST_CLASSES},
+                new String[]{BYTES},
+                new String[]{BYTES, dummy.getPid()},
+                new String[]{BASE64},
+                new String[]{BASE64, dummy.getPid()},
+                new String[]{OVERWRITE},
+                new String[]{OVERWRITE, dummy.getPid()},
+                new String[]{DECOMPILE},
+                new String[]{DECOMPILE, dummy.getPid()},
+                new String[]{DECOMPILE, dummy.getPid(), "javap"},
+                new String[]{COMPILE},
+                new String[]{COMPILE, "-r"},
+                new String[]{COMPILE, "-r", "-cp", dummy.getPid()},
+                new String[]{COMPILE, "-r", "-cp", dummy.getPid(), "-p", "unimportantPluginName"}
+        ).map(a -> (Object) a).map(Arguments::of); // cast needed because of varargs factory method .of()
+    }
+
+    @ParameterizedTest
+    @MethodSource("tooFewArgumentsSource")
+    void testTooFewArguments(String[] wrongArgs) {
+        args = wrongArgs;
+        cli = new Cli(args, model);
+
+        assertThrows(IllegalArgumentException.class, () -> cli.consumeCli());
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"", "-v"})
     void testDecompileJavap(String option) throws Exception {
@@ -414,6 +467,54 @@ public class CliTest {
 
         filteredArgs = ((List<String>) field.get(cli)).toArray(new String[0]);
         assertArrayEquals(args, filteredArgs);
+    }
+
+    @Test
+    void testOverwriteTooManyArguments() {
+        args = new String[]{
+                OVERWRITE,
+                dummy.getPid(),
+                TestingDummyHelper.CLASS_NAME,
+                TestingDummyHelper.DOT_CLASS_PATH,
+                TestingDummyHelper.DOT_CLASS_PATH
+        };
+        cli = new Cli(args, model);
+
+        assertThrows(IllegalArgumentException.class, () -> cli.consumeCli());
+    }
+
+    private Stream<byte[]> incorrectClassContents() {
+        return Stream.of(
+                TestingDummyHelper.DUMMY_CLASS_CONTENT, // no package
+                "package " + TestingDummyHelper.PACKAGE_NAME + ";", // no class
+                "uncompilable text?"
+        ).map(s -> s.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @ParameterizedTest(name = "[{index}]")
+    @MethodSource("incorrectClassContents")
+    void testGuessNameIncorrect(byte[] contents) {
+        assertThrows(RuntimeException.class, () -> Cli.guessName(contents));
+    }
+
+    private Stream<byte[]> correctClassContents() {
+        return Stream.of(
+                TestingDummyHelper.getContentWithPackage(),
+                TestingDummyHelper.getEmptyClass()
+        ).map(s -> s.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @ParameterizedTest(name = "[{index}]")
+    @MethodSource("correctClassContents")
+    void testGuessNameCorrect(byte[] contents) {
+        try {
+            assertEquals(
+                    TestingDummyHelper.PACKAGE_NAME + "." + TestingDummyHelper.CLASS_NAME,
+                    Cli.guessName(contents)
+            );
+        } catch (IOException e) {
+            fail(e);
+        }
     }
 
     private static boolean isDifferenceTolerable(double samenessPercentage, int actualChanges, int totalSize) {
@@ -501,6 +602,11 @@ public class CliTest {
         }
 
         public void captureStreams(boolean capture) {
+            if (capture) {
+                out.reset();
+                err.reset();
+            }
+
             System.setOut(capture ? new PrintStream(out, true, StandardCharsets.UTF_8) : originalOut);
             System.setErr(capture ? new PrintStream(err, true, StandardCharsets.UTF_8) : originalErr);
         }
