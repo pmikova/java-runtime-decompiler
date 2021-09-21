@@ -45,9 +45,10 @@ public class SettingsView extends JDialog {
         public JLabel nestedJars;
         public JButton addButton;
         public JButton removeButton;
-        public JList list;
-        public JScrollPane scrollPane;
         public DefaultListModel defaultListModel;
+        public JList currentExtensionsList;
+        public JScrollPane scrollPane;
+
 
         SettingsPanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
 
@@ -109,12 +110,12 @@ public class SettingsView extends JDialog {
             newExtensionsTextField = new JTextField();
 
             defaultListModel = new DefaultListModel();
-            list = new JList(defaultListModel);
-            list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            list.setLayoutOrientation(JList.VERTICAL);
-            list.setVisibleRowCount(-1);
+            currentExtensionsList = new JList(defaultListModel);
+            currentExtensionsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            currentExtensionsList.setLayoutOrientation(JList.VERTICAL);
+            currentExtensionsList.setVisibleRowCount(-1);
 
-            scrollPane = new JScrollPane(list);
+            scrollPane = new JScrollPane(currentExtensionsList);
             scrollPane.setPreferredSize(new Dimension(0, 200));
 
             addButton = new JButton("ADD");
@@ -127,7 +128,7 @@ public class SettingsView extends JDialog {
 
             removeButton = new JButton("REMOVE");
             removeButton.addActionListener(actionEvent -> {
-                int index = list.getSelectedIndex();
+                int index = currentExtensionsList.getSelectedIndex();
                 defaultListModel.removeElementAt(index);
             });
 
@@ -136,7 +137,7 @@ public class SettingsView extends JDialog {
                 newExtensionsTextField.setEnabled(!useDefaults.isSelected());
                 addButton.setEnabled(!useDefaults.isSelected());
                 removeButton.setEnabled(!useDefaults.isSelected());
-                list.setEnabled(!useDefaults.isSelected());
+                currentExtensionsList.setEnabled(!useDefaults.isSelected());
             });
             useDefaults.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Default extensions that are searched are: .zip, .jar, .war, .ear");
 
