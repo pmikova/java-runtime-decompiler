@@ -133,8 +133,7 @@ public class SettingsView extends JDialog {
 
             removeButton = new JButton("Remove");
             removeButton.addActionListener(actionEvent -> {
-                int index = currentExtensionsList.getSelectedIndex();
-                defaultListModel.removeElementAt(index);
+                defaultListModel.removeElementAt(currentExtensionsList.getSelectedIndex());
             });
 
             useDefaults = new JCheckBox("Use default extensions");
