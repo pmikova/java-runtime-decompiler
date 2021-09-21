@@ -45,8 +45,8 @@ public class SettingsView extends JDialog {
         public JLabel nestedJars;
         public JButton addButton;
         public JButton removeButton;
-        public DefaultListModel defaultListModel;
-        public JList currentExtensionsList;
+        public DefaultListModel<String> defaultListModel;
+        public JList<DefaultListModel<String>> currentExtensionsList;
         public JScrollPane scrollPane;
 
 
@@ -109,7 +109,7 @@ public class SettingsView extends JDialog {
             nestedJars = new JLabel("Nested Jars Settings:");
             newExtensionsTextField = new JTextField();
 
-            defaultListModel = new DefaultListModel();
+            defaultListModel = new DefaultListModel<>();
             currentExtensionsList = new JList(defaultListModel);
             currentExtensionsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             currentExtensionsList.setLayoutOrientation(JList.VERTICAL);
