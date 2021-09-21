@@ -119,7 +119,7 @@ public class SettingsView extends JDialog {
             scrollPane = new JScrollPane(currentExtensionsList);
             scrollPane.setPreferredSize(new Dimension(0, 200));
 
-            addButton = new JButton("ADD");
+            addButton = new JButton("Add");
             addButton.addActionListener(actionEvent -> {
                 for (String s : newExtensionsTextField.getText().split( "\\s")) {
                     if (s.equals("") || s.equals("\\s")) {
@@ -131,7 +131,7 @@ public class SettingsView extends JDialog {
                 newExtensionsTextField.setText("");
             });
 
-            removeButton = new JButton("REMOVE");
+            removeButton = new JButton("Remove");
             removeButton.addActionListener(actionEvent -> {
                 int index = currentExtensionsList.getSelectedIndex();
                 defaultListModel.removeElementAt(index);
