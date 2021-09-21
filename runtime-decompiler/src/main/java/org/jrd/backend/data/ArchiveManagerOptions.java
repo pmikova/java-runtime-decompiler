@@ -25,9 +25,13 @@ public class ArchiveManagerOptions {
 		return Collections.unmodifiableList(extensions);
 	}
 
+	public boolean usingDefaults() {
+		return extensions == null || extensions.isEmpty() || (extensions.size() == 1 && extensions.get(0).trim().isEmpty());
+	}
+
 	public boolean isInner(String n) {
 		String name = n.toLowerCase();
-		if (extensions == null || extensions.isEmpty() || (extensions.size() == 1 && extensions.get(0).trim().isEmpty())) {
+		if (usingDefaults()) {
 			return oneEnds(defaults, name);
 		} else {
 			return oneEnds(extensions, name);

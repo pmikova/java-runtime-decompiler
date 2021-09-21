@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.settings;
 
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.ArchiveManager;
 import org.jrd.backend.data.ArchiveManagerOptions;
 import org.jrd.backend.data.Config;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
@@ -147,7 +148,7 @@ public class SettingsView extends JDialog {
 
             // Setup
             List<String> l = ArchiveManagerOptions.getInstance().getExtensions();
-            if (l == null || l.isEmpty()) {
+            if (ArchiveManagerOptions.getInstance().usingDefaults()) {
                 useDefaults.setSelected(true);
             } else {
                 defaultListModel.addAll(l);
@@ -205,12 +206,14 @@ public class SettingsView extends JDialog {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             }
 
+            List<String> extensions;
             if (settingsPanel.useDefaults.isSelected()) {
-                ArchiveManagerOptions.getInstance().setExtension(new ArrayList<String>());
+                extensions = new ArrayList<String>();
             } else {
-                List<String> ext = Collections.list(settingsPanel.defaultListModel.elements());
-                ArchiveManagerOptions.getInstance().setExtension(ext);
+              extensions = Collections.list(settingsPanel.defaultListModel.elements());
+
             }
+            ArchiveManagerOptions.getInstance().setExtension(extensions);
             dispose();
         });
         okButton.setPreferredSize(new Dimension(90, 30));
