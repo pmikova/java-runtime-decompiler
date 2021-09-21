@@ -47,7 +47,7 @@ public class SettingsView extends JDialog {
         public JButton removeButton;
         public JList list;
         public JScrollPane scrollPane;
-        DefaultListModel dList;
+        public DefaultListModel defaultListModel;
 
         SettingsPanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
 
@@ -108,8 +108,8 @@ public class SettingsView extends JDialog {
             nestedJars = new JLabel("Nested Jars Settings:");
             newExtensionsTextField = new JTextField();
 
-            dList = new DefaultListModel();
-            list = new JList(dList);
+            defaultListModel = new DefaultListModel();
+            list = new JList(defaultListModel);
             list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             list.setLayoutOrientation(JList.VERTICAL);
             list.setVisibleRowCount(-1);
@@ -120,7 +120,7 @@ public class SettingsView extends JDialog {
             addButton = new JButton("ADD");
             addButton.addActionListener(actionEvent -> {
                 for (String s : newExtensionsTextField.getText().split( "\\s")) {
-                    dList.addElement(s);
+                    defaultListModel.addElement(s);
                 }
                 newExtensionsTextField.setText("");
             });
@@ -128,7 +128,7 @@ public class SettingsView extends JDialog {
             removeButton = new JButton("REMOVE");
             removeButton.addActionListener(actionEvent -> {
                 int index = list.getSelectedIndex();
-                dList.removeElementAt(index);
+                defaultListModel.removeElementAt(index);
             });
 
             useDefaults = new JCheckBox("Use default extensions");
@@ -145,7 +145,7 @@ public class SettingsView extends JDialog {
             if (l == null || l.isEmpty()) {
                 useDefaults.setSelected(true);
             } else {
-                dList.addAll(l);
+                defaultListModel.addAll(l);
             }
 
             gbc.insets = new Insets(30, 20, 0, 0);
@@ -203,7 +203,7 @@ public class SettingsView extends JDialog {
             if (settingsPanel.useDefaults.isSelected()) {
                 ArchiveManagerOptions.getInstance().setExtension(new ArrayList<String>());
             } else {
-                List<String> ext = Collections.list(settingsPanel.dList.elements());
+                List<String> ext = Collections.list(settingsPanel.defaultListModel.elements());
                 ArchiveManagerOptions.getInstance().setExtension(ext);
             }
             dispose();
