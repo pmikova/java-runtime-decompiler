@@ -81,7 +81,7 @@ public class SettingsView extends JDialog {
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.BOTH;
 
-            gbc.insets = new Insets(0, 20, 0, 0);
+            gbc.insets = new Insets(20, 20, 0, 0);
             gbc.gridx = 1;
             this.add(this.agentPathLabel, gbc);
 
