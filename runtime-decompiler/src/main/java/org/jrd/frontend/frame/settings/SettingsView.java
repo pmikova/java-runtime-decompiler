@@ -81,7 +81,7 @@ public class SettingsView extends JDialog {
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.BOTH;
 
-            gbc.insets = new Insets(0,20,0,0);
+            gbc.insets = new Insets(0, 20, 0, 0);
             gbc.gridx = 1;
             this.add(this.agentPathLabel, gbc);
 
@@ -90,17 +90,17 @@ public class SettingsView extends JDialog {
             gbc.gridx = 1;
             this.add(agentPathTextField, gbc);
 
-            gbc.insets = new Insets(0,20,0,20);
+            gbc.insets = new Insets(0, 20, 0, 20);
             gbc.gridx = 2;
             gbc.gridy = 1;
             this.add(browseButton, gbc);
 
-            gbc.insets = new Insets(20,20,0,0);
+            gbc.insets = new Insets(20, 20, 0, 0);
             gbc.gridx = 1;
             gbc.gridy = 3;
             this.add(checkBoxSettings, gbc);
 
-            gbc.insets = new Insets(5,20,0,0);
+            gbc.insets = new Insets(5, 20, 0, 0);
             gbc.gridx = 1;
             gbc.gridy = 4;
             this.add(useHostSystemClassesCheckBox, gbc);
@@ -163,17 +163,17 @@ public class SettingsView extends JDialog {
             gbc.gridwidth = 3;
             this.add(scrollPane, gbc);
 
-            gbc.insets = new Insets(5,20,0,0);
+            gbc.insets = new Insets(5, 20, 0, 0);
             gbc.weighty = 0;
             gbc.gridy = 8;
             gbc.gridwidth = 1;
             this.add(newExtensionsTextField, gbc);
 
-            gbc.insets = new Insets(5,5,0,0);
+            gbc.insets = new Insets(5, 5, 0, 0);
             gbc.gridx = 2;
             this.add(addButton, gbc);
 
-            gbc.insets = new Insets(5,5,0,20);  //top padding
+            gbc.insets = new Insets(5, 5, 0, 20);  //top padding
             gbc.gridx = 3;
             this.add(removeButton, gbc);
 
