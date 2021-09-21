@@ -91,6 +91,7 @@ public class SettingsView extends JDialog {
             this.add(agentPathTextField, gbc);
 
             gbc.insets = new Insets(0, 20, 0, 20);
+            gbc.weightx = 0;    
             gbc.gridx = 2;
             gbc.gridy = 1;
             this.add(browseButton, gbc);
