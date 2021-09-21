@@ -91,7 +91,7 @@ public class SettingsView extends JDialog {
             this.add(agentPathTextField, gbc);
 
             gbc.insets = new Insets(0, 20, 0, 20);
-            gbc.weightx = 0;    
+            gbc.weightx = 0;
             gbc.gridx = 2;
             gbc.gridy = 1;
             this.add(browseButton, gbc);
@@ -122,7 +122,11 @@ public class SettingsView extends JDialog {
             addButton = new JButton("ADD");
             addButton.addActionListener(actionEvent -> {
                 for (String s : newExtensionsTextField.getText().split( "\\s")) {
-                    defaultListModel.addElement(s);
+                    if (s.equals("") || s.equals("\\s")) {
+                        // Do nothing
+                    } else {
+                        defaultListModel.addElement(s);
+                    }
                 }
                 newExtensionsTextField.setText("");
             });
